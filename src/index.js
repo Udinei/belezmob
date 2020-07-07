@@ -1,15 +1,21 @@
-﻿
-import React from 'react';
+﻿import React from 'react';
+// manipula o state antes de rederizar os dados
+import { PersistGate } from 'redux-persist/integration/react';
+import { Provider } from 'react-redux';
 import { StatusBar } from 'react-native';
-import Routes from './routes';
+import App from './App';
 
-//import './config/ReactrotonConfig';
+import './config/ReactrotonConfig';
 
-export default function App() {
+import { store, persistor } from './store';
+
+export default function index() {
     return (
-        <>
-            <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
-            <Routes />
-        </>
+        <Provider store={ store }>
+            <PersistGate persistor={ persistor }>
+                <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
+                <App />
+            </PersistGate>
+        </Provider>
     )
 }
