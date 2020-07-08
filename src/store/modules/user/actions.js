@@ -1,4 +1,5 @@
-﻿export function updateProfileRequest(data){
+﻿// recebe um objeto "data" com todos os dados do profile
+export function updateProfileRequest(data){
     return {
         type: '@user/UPDATE_PROFILE_REQUEST',
         payload: { data },

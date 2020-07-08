@@ -9,11 +9,11 @@ import { updateProfileSuccess, updateProfileFailure } from './actions';
 export function* updateProfile({ payload }) {
     try {
         // desestruc data, para name, email e o restante do data coloca em rest
-        const { name, email, avatar_id, ...rest } = payload.data;
+        const { name, email, ...rest } = payload.data;
 
         // Object.assign - uni dois objetos
         const profile = Object.assign(
-            { name, email, avatar_id },
+            { name, email },
             rest.oldPassword ? rest : {},/** se oldpassword foi preenchido, o user quer alterar a senha, entao envia o restante dos dados de data, senao envia um objeto vazio */
         )
 
