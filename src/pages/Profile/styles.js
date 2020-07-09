@@ -40,5 +40,11 @@ export const FormInput = styled(Input)`
 
 // customizando o componente Button ja criado
 export const SubmitButton = styled(Button)`
+    margin-top: 5px;
+`;
+
+// customizando o componente Button ja criado
+export const LogoutButton = styled(Button)`
     margin-top: 10px;
+    background: #f64c75;
 `;

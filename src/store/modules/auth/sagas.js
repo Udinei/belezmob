@@ -89,9 +89,6 @@ export function setToken({ payload }){
    }
 }
 
-export function signOut(){
-   // history.push('/');
-}
 
 // registra e observa, quando a action @auth/SIGN_IN_REQUEST for executada, chama
 // a funcao signIn mo saga - takeLatest - apenas a função enviada no último click
@@ -100,5 +97,5 @@ export default all([
     takeLatest('persist/REHYDRATE', setToken), // permite enviar o token toda vez que a api for requisitada
     takeLatest('@auth/SIGN_IN_REQUEST', signIn),
     takeLatest('@auth/SIGN_UP_REQUEST', signUp),
-    takeLatest('@auth/SIGN_OUT', signOut),
+
 ]);

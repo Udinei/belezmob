@@ -30,6 +30,7 @@ export default function auth(state = INITIAL_STATE, action) {
                 draft.loading = false;
                 break;
             }
+            // saindo da aplicação, limpa token e signed=false(usuario nao esta mais logado)
             case '@auth/SIGN_OUT': {
                 draft.token = null;
                 draft.signed = false;
