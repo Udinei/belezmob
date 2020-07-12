@@ -21,13 +21,11 @@ export default function Appointment({ data, onCancel }) {
         <Container past={ data.past }>
             <Left>
                 <Avatar
-
                     source={ {
                         uri: data.provider.avatar
                             ? data.provider.avatar.url
                             : `https://api.adorable.io/avatars/50/${data.provider.name}.png`
                     } }
-
                 />
                 <Info>
                     <Name>{ data.provider.name }</Name>

@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { withNavigationFocus } from 'react-navigation';
 import api from '~/services/api';
 
 import Background from '~/components/Background';
@@ -8,24 +9,24 @@ import Appointment from '~/components/Appointment';
 
 import { Container, Title, List } from './styles';
 
-export default function Dashboard(){
+function Dashboard({ isFocused }){
     // appointments, var. manipulada pelo mento setAppointments
     const [appointments, setAppointments] = useState([]);
 
+    async function loadAppointments(){
+        // obtem os agendamentos
+        const response = await api.get('appoitments');
+        setAppointments(response.data);// atribui dadoas retornando por response a var. appointments
+    }
 
-    // faz o papel do didmount
+    // se a tela recebeu o foco
     useEffect(() => {
-        async function loadAppointments(){
-            // obtem os agendamentos
-            const response = await api.get('appoitments');
-
-            setAppointments(response.data);// atribui dadoas retornando por response a var. appointments
+        if(isFocused){
+         // carrega os agendamentos
+        loadAppointments();
         }
 
-         // executando a função
-        loadAppointments();
-
-    },[]);
+    },[isFocused]);
 
     async function handleCancel(id){
          const response = await api.delete(`appoitments/${id}`);
@@ -62,3 +63,5 @@ Dashboard.navigationOptions = {
         <Icon name="event" size={20} color={tintColor} />
     ),
 }
+
+export default withNavigationFocus(Dashboard);
