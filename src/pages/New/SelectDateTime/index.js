@@ -12,7 +12,6 @@ export default function SelectDateTime({ navigation }) {
     const [date, setDate] = useState(new Date());
     const [hours, setHours] = useState([]);
 
-    console.tron.log('data agora', date);
     // obtendo o provider da navegação
     const provider = navigation.getParam('provider');
 

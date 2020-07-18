@@ -30,6 +30,8 @@ export default function SignUp({ navigation }) {
 
     function handleSubmit(){
         dispatch(signUpRequest(name, email, password));
+        navigation.navigate('SignIn'); // redireciona para pagina de login
+
 
     }
 

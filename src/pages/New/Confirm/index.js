@@ -1,13 +1,14 @@
 ﻿import React, { useState, useEffect, useMemo } from 'react';
 import { formatRelative, parseISO } from 'date-fns';
 import pt from 'date-fns/locale/pt';
+import { zonedTimeToUtc, format } from 'date-fns-tz';
+
 import { TouchableOpacity } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '~/services/api';
 
 import Background from '~/components/Background';
-import DateInput from '~/components/DateInput';
 
 import { Container, Avatar, Name, Time, SubmitButton } from './styles';
 
@@ -16,9 +17,11 @@ export default function Confirm({ navigation }) {
     const time = navigation.getParam('time');
 
     const dateFormatted = useMemo(
-        () => formatRelative(parseISO(time), new Date(), { locale: pt }),
+        () => format(parseISO(time),"'Dia' dd 'de' MMMM', às ' HH:mm'h'", { locale: pt }),
         [time]
     );
+
+
 
     async function handleAddAppointment(){
           await api.post('appoitments', {

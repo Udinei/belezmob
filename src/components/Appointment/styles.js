@@ -38,7 +38,7 @@ export const Name = styled.Text`
 `;
 
 export const Time = styled.Text`
-    color: #999;
-    font-size: 13px;
+    color: #000000;
+    font-size: 15px;
     margin-top: 4px;
 `;
