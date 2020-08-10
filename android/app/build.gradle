@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2/' } // Gradle Plugin Portal
+    }
+    dependencies {
+        classpath 'gradle.plugin.com.onesignal:onesignal-gradle-plugin:[0.12.6, 0.99.99]'
+    }
+}
+
+apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'
+
 apply plugin: "com.android.application"
 
 import com.android.build.OutputFile
@@ -143,6 +154,8 @@ android {
             include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
     }
+
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -154,14 +167,23 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            buildConfigField "String", "CODEPUSH_KEY", '""'
         }
+
+        releaseStaging {
+                buildConfigField "String", "CODEPUSH_KEY", '"5o4E__4cePiM4v9JkYScdLwrlvnz6t_xggBCZ"'
+                matchingFallbacks= ['debug','release'] // use debug ou release caso nao encontre aqui a configuração necessaria
+        }
+
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://facebook.github.io/react-native/docs/signed-apk-android.
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            buildConfigField "String", "CODEPUSH_KEY", '"klNjLaRdO1NsItYqxlVIICjYW8hmk1jBlHArc"'
         }
+
     }
 
     packagingOptions {
@@ -188,6 +210,9 @@ android {
 }
 
 dependencies {
+
+compile project(':react-native-code-push')
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
@@ -215,6 +240,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+
 }
 
 // Run this once to be able to run the application with BUCK
@@ -231,3 +258,6 @@ project.ext.vectoricons = [
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+
+//apply from: "../../node_modules/react-native/react.gradle"
+apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"

@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">belezmob</string>
+    <string name="app_name">Belez Mob</string>
+     <string moduleConfig="true" name="CodePushDeploymentKey">DeploymentKey</string>
 </resources>
