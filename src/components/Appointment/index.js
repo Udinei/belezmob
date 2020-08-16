@@ -1,5 +1,5 @@
 ﻿import React, { useMemo } from 'react';
-import { parseISO, formatDistance, formatRelative } from 'date-fns';
+import { parseISO, formatDistance, formatRelative, getHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 import { TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'
@@ -9,13 +9,21 @@ export default function Appointment({ data, onCancel }) {
 
     // memoriaza quanto tempo falta para o atendimento
     const dateParse = useMemo(() => {
-        // calcula quanto tempo falta de hoje até o dia do atendimento
-        return formatRelative(parseISO(data.date), new Date(), {
+        //console.log('data.past.....', data.past);
+
+        const arrayDate = data.date.split("T")[1];
+        const horasAndMinutes = arrayDate.split("+")[0];
+
+        // calcula quanto tempo falta de react.gradle até o dia do atendimento
+        let dataCustom = formatRelative(parseISO(data.date), new Date(), {
             locale: pt,
             addSuffix: true,
         });
-    }, [data.date]);
 
+        dataCustom = dataCustom.split('').reverse().join('').slice(5).split('').reverse().join('');
+        return dataCustom.concat(horasAndMinutes.slice(0,5));
+
+    }, [data.date]);
 
     return (
         <Container past={ data.past }>

@@ -9,6 +9,8 @@ import { Container, DateButton, DateText } from './styles'
 
 export default function DateInput({ date, onChange }) {
 
+    //console.log('Date Input agendamento.....', date);
+
     const dateFormatted = useMemo(() =>
         format(date, "dd 'de' MMMM 'de' yyyy", { locale: pt })
     , [date]);

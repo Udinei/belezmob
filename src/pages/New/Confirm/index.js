@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useMemo } from 'react';
-import { formatRelative, parseISO } from 'date-fns';
+import { formatRelative, parseISO, getHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
-import { zonedTimeToUtc, format } from 'date-fns-tz';
+import { utcToZonedTime, format } from 'date-fns-tz';
 
 import { TouchableOpacity } from 'react-native';
 
@@ -16,11 +16,13 @@ export default function Confirm({ navigation }) {
     const provider = navigation.getParam('provider');
     const time = navigation.getParam('time');
 
+    const arrayDate = time.split("T")[1];
+    const horasAndMinutes = arrayDate.split("+")[0];
+
     const dateFormatted = useMemo(
-        () => format(parseISO(time),"'Dia' dd 'de' MMMM', às ' HH:mm'h'", { locale: pt }),
+        () => format(parseISO(time),"'Dia' dd 'de' MMMM', às ", { locale: pt }).concat(horasAndMinutes.slice(0,5)),
         [time]
     );
-
 
 
     async function handleAddAppointment(){

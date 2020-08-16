@@ -2,65 +2,82 @@
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { withNavigationFocus } from 'react-navigation';
 import api from '~/services/api';
+import timeZoneMob from '~/services/timezonemob';
+
+import { isBefore, parseISO, subHours } from 'date-fns';
 
 import Background from '~/components/Background';
-
 import Appointment from '~/components/Appointment';
-
 import { Container, Title, List } from './styles';
 
-function Dashboard({ isFocused }){
-    // appointments, var. manipulada pelo mento setAppointments
+function Dashboard({ isFocused }) {
+
+    // obtem a data e horario atual do dispositivo
+    const hoje = timeZoneMob;
+
+    // appointments, var. manipulada pelo metodo setAppointments
     const [appointments, setAppointments] = useState([]);
 
-    async function loadAppointments(){
+    async function loadAppointments() {
         // obtem os agendamentos
         const response = await api.get('appoitments');
-        setAppointments(response.data);// atribui dadoas retornando por response a var. appointments
+
+        const agendamentos = response.data;
+
+        // corrige horarios conforme timeZone e se ainda podem ser cancelados
+        const newData = agendamentos.map(agenda => {
+            // sincroniza atributo past (se os horarios ja passaram conforme timeZone)
+            agenda.past = isBefore(parseISO(agenda.date), new Date(hoje));
+            // exibe icone de cancelamento, agendamentos só podem ser canceladas somente duas horas antes do agendado
+            agenda.cancelable = isBefore(new Date(hoje), subHours(parseISO(agenda.date), 2))
+            return agenda;
+        });
+
+        setAppointments(newData);// atribui dadoas retornando por response a var. appointments
     }
 
     // se a tela recebeu o foco
     useEffect(() => {
-        if(isFocused){
-         // carrega os agendamentos
-        loadAppointments();
+        if (isFocused) {
+            // carrega os agendamentos
+            loadAppointments();
         }
 
-    },[isFocused]);
+    }, [isFocused]);
 
-    async function handleCancel(id){
-         const response = await api.delete(`appoitments/${id}`);
+    async function handleCancel(id) {
+        const response = await api.delete(`appoitments/${id}`);
 
-         setAppointments(
-             appointments.map(appointment =>
+        setAppointments(
+            appointments.map(appointment =>
                 appointment.id === id
-                ? {
-                    ...appointment, // retorna todos os appointment
-                    canceled_at: response.data.canceled_at, // porem o appointment que tem o id, seta a data como cancelada
-                  }
-                : appointment
-             )
-         );
+                    ? {
+                        ...appointment, // retorna todos os appointment
+                        canceled_at: response.data.canceled_at, // porem o appointment que tem o id, seta a data como cancelada
+                    }
+                    : appointment
+            )
+        );
     }
 
 
-  return <Background>
-      <Container>
-          <Title>Agendamentos</Title>
-           <List
-              data={appointments}
-              keyExtractor={item => String(item.id)}
-              renderItem={({ item }) => <Appointment onCancel={() => handleCancel(item.id)}  data={item} />}
-           />
-      </Container>
-  </Background>;
+    return <Background>
+        <Container>
+            <Title>Agendamentos</Title>
+            <List
+                data={ appointments }
+                keyExtractor={ item => String(item.id) }
+                renderItem={ ({ item }) => <Appointment onCancel={ () => handleCancel(item.id) } data={ item } /> }
+            />
+        </Container>
+    </Background>;
 }
 
 // criando tabs de navegação no roda-pe
 Dashboard.navigationOptions = {
     tabBarLabel: 'Agendamentos',
     tabBarIcon: ({ tintColor }) => (
-        <Icon name="event" size={20} color={tintColor} />
+        <Icon name="event" size={ 20 } color={ tintColor } />
     ),
 }
 
