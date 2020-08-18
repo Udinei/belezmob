@@ -1,7 +1,9 @@
 ﻿import React, { useState, useEffect, useMemo } from 'react';
 import { formatRelative, parseISO, getHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
-import { utcToZonedTime, format } from 'date-fns-tz';
+
+import { utcToZonedTime, zonedTimeToUtc, format, toDate } from 'date-fns-tz';
+import * as RNLocalize from "react-native-localize";
 
 import { TouchableOpacity } from 'react-native';
 
@@ -12,7 +14,9 @@ import Background from '~/components/Background';
 
 import { Container, Avatar, Name, Time, SubmitButton } from './styles';
 
+
 export default function Confirm({ navigation }) {
+    const timeZone = RNLocalize.getTimeZone();
     const provider = navigation.getParam('provider');
     const time = navigation.getParam('time');
 
@@ -24,11 +28,22 @@ export default function Confirm({ navigation }) {
         [time]
     );
 
+    // formata horario a ser salvo com timezone(horario) do dispositivo
+    const dateSave = useMemo(
+        () => {
+                return time.slice(0,19);
+              },
+        [time]
+    );
 
     async function handleAddAppointment(){
+          console.log('date do front a Savar......', dateSave);
+          console.log('utcToZonedTime......', utcToZonedTime(new Date('2020-08-17 18:00:00 UTC')));
+          console.log('zonedTimeToUtc.......', zonedTimeToUtc(dateSave,timeZone));
+
           await api.post('appoitments', {
               provider_id: provider.id,
-              date: time,
+              date: dateSave,
           });
 
           navigation.navigate('Dashboard');

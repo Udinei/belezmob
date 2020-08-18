@@ -10,12 +10,17 @@ import DateInput from '~/components/DateInput';
 
 import { Container, HourList, Hour, Title } from './styles';
 import timeZoneMob from '~/services/timezonemob';
+import * as RNLocalize from "react-native-localize";
 
 export default function SelectDateTime({ navigation }) {
-    //obtem timeZone do dispositivo ex: 'America/Cuiaba'
+    // Obtem timeZone do dispositivo ex: 'America/Cuiaba'
+    // vai ser enviado como parametro para o backend calcular datas e tempo
+    const timeZone = RNLocalize.getTimeZone();
+
+    // data de hoje com timeZone do dispoitivo
     const hoje = timeZoneMob;
 
-    // inicia com a data de hoje
+    // staste inicia com a data de hoje
     const [date, setDate] = useState(new Date(hoje));
     const [hours, setHours] = useState([]);
 
@@ -29,6 +34,7 @@ export default function SelectDateTime({ navigation }) {
             const response = await api.get(`providers/${provider.id}/available`, {
                 params: {
                     date: date.getTime(), //retorna o formato em timestamp
+                    timeZoneFront: timeZone,
                 }
             });
 

@@ -3,6 +3,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { withNavigationFocus } from 'react-navigation';
 import api from '~/services/api';
 import timeZoneMob from '~/services/timezonemob';
+import formatInTimeZone from '~/services/formatInTimeZone';
+import * as RNLocalize from "react-native-localize";
+const { utcToZonedTime, zonedTimeToUtc, format } = require('date-fns-tz')
 
 import { isBefore, parseISO, subHours } from 'date-fns';
 
@@ -10,10 +13,31 @@ import Background from '~/components/Background';
 import Appointment from '~/components/Appointment';
 import { Container, Title, List } from './styles';
 
+    /**
+     * Essa funcao
+     *  timeZone = 'America/Cuiaba'
+     *  entrada: 2020-08-17T21:00:00.000Z
+     *  saida: 2020-08-17 17:00:00 -04:00
+     *  timeZone = "UTC"
+     *   entrada: 2020-08-17T21:00:00.000Z
+     *   saida: 2020-08-17 21:00:00 +00:00
+     * @param {*} date - data - ex: parseISO(agenda.date)
+     * @param {*} fmt - formato - "yyyy-MM-dd kk:mm:ss xxx"
+     * @param {*} tz - timeZone- obtido com RNLocalize  ex: const timeZone = RNLocalize.getTimeZone() ou "UTC"
+     * ex de uso: formatInTimeZone(parseISO(agenda.date), "yyyy-MM-dd kk:mm:ss xxx", timeZone)
+     */
+    /*const formatInTimeZone = (date, fmt, tz) =>
+        format(utcToZonedTime(date, tz),
+            fmt,
+            { timeZone: tz });
+     */
+
 function Dashboard({ isFocused }) {
+
 
     // obtem a data e horario atual do dispositivo
     const hoje = timeZoneMob;
+    const timeZone = RNLocalize.getTimeZone();
 
     // appointments, var. manipulada pelo metodo setAppointments
     const [appointments, setAppointments] = useState([]);
@@ -26,10 +50,20 @@ function Dashboard({ isFocused }) {
 
         // corrige horarios conforme timeZone e se ainda podem ser cancelados
         const newData = agendamentos.map(agenda => {
+            const dateTimeZone = formatInTimeZone(parseISO(agenda.date), "yyyy-MM-dd kk:mm:ss xxx", timeZone);
+            //const dateTimeZone = formatInTimeZone(parseISO(agenda.date), "yyyy-MM-dd kk:mm:ss xxx", timeZone);
+           // const hojeTimeZone = formatInTimeZone(parseISO(new Date(hoje)), "yyyy-MM-dd kk:mm:ss xxx", timeZone);
+           // console.log("1.........", dateTimeZone);
+           // console.log("2.........", dateTimeZone.split(' ')[0]+"T"+dateTimeZone.split(' ')[1]+".000Z");
+            const newDateAgendaTimeZone = dateTimeZone.split(' ')[0]+"T"+dateTimeZone.split(' ')[1]+".000Z";
+
             // sincroniza atributo past (se os horarios ja passaram conforme timeZone)
-            agenda.past = isBefore(parseISO(agenda.date), new Date(hoje));
+            agenda.past = isBefore(parseISO(newDateAgendaTimeZone), new Date(hoje));
+            //agenda.past = isBefore(dateTimeZone, hojeTimeZone);
+
             // exibe icone de cancelamento, agendamentos só podem ser canceladas somente duas horas antes do agendado
-            agenda.cancelable = isBefore(new Date(hoje), subHours(parseISO(agenda.date), 2))
+            agenda.cancelable = isBefore(new Date(hoje), subHours(parseISO(newDateAgendaTimeZone), 2))
+            //agenda.cancelable = isBefore(hojeTimeZone, subHours(dateTimeZone), 2);
             return agenda;
         });
 
