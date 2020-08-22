@@ -38,6 +38,12 @@ export default function SelectDateTime({ navigation }) {
                 }
             });
 
+
+            // corrige horarios conforme timeZone e se ainda podem ser cancelados
+            console.log('Em selectDateTime/MOB....................');
+            console.log('TimeZone enviado ao get do backEnd......', timeZone);
+            console.log('response.data...............', response.data);
+            console.log('date.getTime enviado ao backend........', date.getTime());
             setHours(response.data);
 
         }

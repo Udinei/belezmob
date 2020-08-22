@@ -37,13 +37,14 @@ export default function Confirm({ navigation }) {
     );
 
     async function handleAddAppointment(){
+          console.log('time......................', time);
           console.log('date do front a Savar......', dateSave);
-          console.log('utcToZonedTime......', utcToZonedTime(new Date('2020-08-17 18:00:00 UTC')));
+          console.log('utcToZonedTime......', utcToZonedTime(new Date(), 'UTC'));
           console.log('zonedTimeToUtc.......', zonedTimeToUtc(dateSave,timeZone));
-
+          const dateUtc = zonedTimeToUtc(dateSave, timeZone);
           await api.post('appoitments', {
               provider_id: provider.id,
-              date: dateSave,
+              date: time,
           });
 
           navigation.navigate('Dashboard');

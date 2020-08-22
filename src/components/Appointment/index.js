@@ -16,24 +16,13 @@ export default function Appointment({ data, onCancel }) {
     const dateParse = useMemo(() => {
         const timeZone = RNLocalize.getTimeZone();
 
-        //const date = new Date(data.date);
-        //const zonedDate = utcToZonedTime(date, timeZone)
-        const dateTimeZone = formatInTimeZone(parseISO(data.date), "yyyy-MM-dd kk:mm:ss xxx", timeZone);
+        const dateUTC = formatInTimeZone(parseISO(data.date), "yyyy-MM-dd kk:mm:ss xxx", 'UTC');
 
-        console.log('zonedDate data appointment 1.......', dateTimeZone);
-        const newDateAgendaTimeZone = dateTimeZone.split(' ')[0]+"T"+dateTimeZone.split(' ')[1]+".000Z";
-
-       // const arrayDate = data.date.split("T")[1];
-       // const horasAndMinutes = arrayDate.split("+")[0];
-       const horasAndMinutes = newDateAgendaTimeZone.split("T")[1];
-       const hoje = timeZoneMob;
-       console.log('newDateAgendaTimeZone........',newDateAgendaTimeZone);
-       console.log('hoje........', parseISO(hoje));
-       console.log('parseIso........', parseISO(newDateAgendaTimeZone));
+       const horasAndMinutes = format(parseISO(dateUTC),'HH:mm');
 
         // calcula quanto tempo falta até o dia do atendimento
         //TODO: Bug formatRelative não caulcula a hora corretamente
-        let dataCustom = formatRelative(parseISO(newDateAgendaTimeZone), parseISO(hoje) , {
+        let dataCustom = formatRelative(parseISO(data.date), new Date(), {
             locale: pt,
             addSuffix: true,
 
@@ -48,7 +37,7 @@ export default function Appointment({ data, onCancel }) {
     }, [data.date]);
 
     return (
-        <Container past={ data.past }>
+        <Container past={ data.past } canceled={data.canceled_at}>
             <Left>
                 <Avatar
                     source={ {
