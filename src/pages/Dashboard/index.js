@@ -38,6 +38,7 @@ function Dashboard({ isFocused }) {
     // obtem a data e horario atual do dispositivo
     const hoje = timeZoneMob;
     const timeZone = RNLocalize.getTimeZone();
+    console.log('hoje......', hoje);
 
     // appointments, var. manipulada pelo metodo setAppointments
     const [appointments, setAppointments] = useState([]);
@@ -53,8 +54,8 @@ function Dashboard({ isFocused }) {
             const dateTimeZone = formatInTimeZone(parseISO(agenda.date), "yyyy-MM-dd kk:mm:ss xxx", timeZone);
             //const dateTimeZone = formatInTimeZone(parseISO(agenda.date), "yyyy-MM-dd kk:mm:ss xxx", timeZone);
            // const hojeTimeZone = formatInTimeZone(parseISO(new Date(hoje)), "yyyy-MM-dd kk:mm:ss xxx", timeZone);
-           // console.log("1.........", dateTimeZone);
-           // console.log("2.........", dateTimeZone.split(' ')[0]+"T"+dateTimeZone.split(' ')[1]+".000Z");
+            console.log("1.........", dateTimeZone);
+            console.log("2.........", dateTimeZone.split(' ')[0]+"T"+dateTimeZone.split(' ')[1]+".000Z");
             const newDateAgendaTimeZone = dateTimeZone.split(' ')[0]+"T"+dateTimeZone.split(' ')[1]+".000Z";
 
             // sincroniza atributo past (se os horarios ja passaram conforme timeZone)
@@ -64,10 +65,14 @@ function Dashboard({ isFocused }) {
             // exibe icone de cancelamento, agendamentos só podem ser canceladas somente duas horas antes do agendado
             agenda.cancelable = isBefore(new Date(hoje), subHours(parseISO(newDateAgendaTimeZone), 2))
             //agenda.cancelable = isBefore(hojeTimeZone, subHours(dateTimeZone), 2);
+            agenda.date = newDateAgendaTimeZone;
+
             return agenda;
         });
 
+        console.log('newData................',newData);
         setAppointments(newData);// atribui dadoas retornando por response a var. appointments
+        //setAppointments(response.data);// atribui dadoas retornando por response a var. appointments
     }
 
     // se a tela recebeu o foco

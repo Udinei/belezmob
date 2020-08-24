@@ -5,7 +5,7 @@ import pt from 'date-fns/locale/pt';
 import { utcToZonedTime, zonedTimeToUtc, format, toDate } from 'date-fns-tz';
 import * as RNLocalize from "react-native-localize";
 
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Alert } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '~/services/api';
@@ -13,6 +13,7 @@ import api from '~/services/api';
 import Background from '~/components/Background';
 
 import { Container, Avatar, Name, Time, SubmitButton } from './styles';
+
 
 
 export default function Confirm({ navigation }) {
@@ -42,10 +43,17 @@ export default function Confirm({ navigation }) {
           console.log('utcToZonedTime......', utcToZonedTime(new Date(), 'UTC'));
           console.log('zonedTimeToUtc.......', zonedTimeToUtc(dateSave,timeZone));
           const dateUtc = zonedTimeToUtc(dateSave, timeZone);
+          console.log('dateUtc.......', dateUtc);
+
           await api.post('appoitments', {
               provider_id: provider.id,
               date: time,
-          });
+
+         }).catch((error) => {
+             // se a data/horario desejada do agendamento ja passou exibe msg
+             Alert.alert('Erro', error.response.data.error);
+
+         });
 
           navigation.navigate('Dashboard');
     }

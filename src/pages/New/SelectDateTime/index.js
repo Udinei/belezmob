@@ -2,7 +2,7 @@
 import { TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { format, getMinutes, getHours } from 'date-fns';
+import { format, getMinutes, getHours,isAfter, parseISO } from 'date-fns';
 import api from '~/services/api';
 
 import Background from '~/components/Background';
@@ -40,11 +40,33 @@ export default function SelectDateTime({ navigation }) {
 
 
             // corrige horarios conforme timeZone e se ainda podem ser cancelados
-            console.log('Em selectDateTime/MOB....................');
+            console.log('Em selectDateTime/MOB 11111....................');
             console.log('TimeZone enviado ao get do backEnd......', timeZone);
-            console.log('response.data...............', response.data);
+            //console.log('response.data.appointments...............', response.data.appointments);
+
             console.log('date.getTime enviado ao backend........', date.getTime());
-            setHours(response.data);
+
+            const { data } = response;
+            const appointments = [...data].pop(); // obtem o ultimo item que e appointments
+            data.pop(); // remove a lista de appointments de data
+
+            console.log('......',appointments.appointments);
+
+            const avaiableNew = data.map(time => {
+
+                return {
+                    time: time.time,
+                    value: time.value,
+                    avaiable:
+                        isAfter(parseISO(time.value), new Date()) &&  // se a data data agendada ja passou de hoje retorna false
+                        !appointments.appointments.find(a => format(parseISO(a.date), 'HH:mm') === time.time),
+                    // se encontrar um agendamento para o horario(time) retorna false
+                };
+
+            })
+
+            console.log('avaiable.......',avaiableNew);
+            setHours(avaiableNew);
 
         }
         // chama a funcao
@@ -70,6 +92,7 @@ export default function SelectDateTime({ navigation }) {
                     renderItem={ ({ item }) => (
                         <Hour onPress={ () => handleSelectHour(item.value) } enabled={ item.avaiable }>
                             <Title>{ item.time }</Title>
+
                         </Hour>
                     ) }
                 />

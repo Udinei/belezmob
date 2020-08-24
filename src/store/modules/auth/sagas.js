@@ -42,7 +42,7 @@ export function* signIn({ payload }) {
         // navega para o dashboard
         //history.push('/dashboard');
 
-    } catch (err) {
+    } catch (error) {
         Alert.alert('Falha na autenticação','Houve erro no login, verifique seus dados');
 
         //toast.error('Falha na autenticação, verifique seus dados');
