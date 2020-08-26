@@ -47,7 +47,7 @@ export default function Confirm({ navigation }) {
 
           await api.post('appoitments', {
               provider_id: provider.id,
-              date: time,
+              date: dateUtc,
 
          }).catch((error) => {
              // se a data/horario desejada do agendamento ja passou exibe msg

@@ -1,6 +1,6 @@
 ﻿import * as RNLocalize from "react-native-localize";
 
-const timeZoneMob = () => {
+const dateTimeZoneMob = () => {
     // opções de geração da data atual para comparação com a data desejada de agendamento,
     // enviada na requisição, a data sera criada com toLocaleDateString
     const options = {
@@ -11,6 +11,7 @@ const timeZoneMob = () => {
     };
 
     let tzDate = new Date().toLocaleDateString("pt-BR", options);
+
     const tzHora = tzDate.split(" ")[1]; // obtem somente o horario da data gerada
 
     const tzData = tzDate.split(" ")[0];
@@ -20,4 +21,4 @@ const timeZoneMob = () => {
     return hoje;
 }
 
-export default timeZoneMob();
+export default dateTimeZoneMob();

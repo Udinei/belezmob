@@ -8,7 +8,7 @@ module.exports = {
     globals: {
         Atomics: 'readonly',
         SharedArrayBuffer: 'readonly',
-        __DEV__: 'readonly',
+        react.gradle: 'readonly',
     },
     parser: 'babel-eslint',
     parserOptions: {

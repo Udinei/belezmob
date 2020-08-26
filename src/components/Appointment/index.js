@@ -8,7 +8,7 @@ import { Container, Left, Avatar, Info, Name, Time } from './styles';
 import * as RNLocalize from "react-native-localize";
 const { utcToZonedTime, format } = require('date-fns-tz')
 import formatInTimeZone from '~/services/formatInTimeZone';
-import timeZoneMob from '~/services/timezonemob';
+
 
 export default function Appointment({ data, onCancel }) {
 

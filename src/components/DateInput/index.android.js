@@ -1,19 +1,31 @@
 ﻿import React, { useMemo } from 'react';
 import { DatePickerAndroid } from 'react-native';
-import { format } from 'date-fns';
+import { format } from 'date-fns-tz';
 import pt from 'date-fns/locale/pt';
+import * as RNLocalize from "react-native-localize";
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+const options = {
+    year: 'numeric',
+    month: ('long'),
+    weekday: ( 'long'),
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    timeStyle: ('short' ),
+    timeZone: RNLocalize.getTimeZone(),
+}
 
 import { Container, DateButton, DateText } from './styles'
 
 export default function DateInput({ date, onChange }) {
-
-    //console.log('Date Input agendamento.....', date);
-
+     console.log('teim..............',options.timeZone);
     const dateFormatted = useMemo(() =>
-        format(date, "dd 'de' MMMM 'de' yyyy", { locale: pt })
+        //format(date, "dd 'de' MMMM 'de' yyyy", { locale: pt })
+        new Date(date).toLocaleDateString('pt-br', options)
     , [date]);
+
+    console.log('DateFormatted.....', dateFormatted);
 
     async function handleOpenPicker(){
         // permite o usuario selecionar uma data no componente
