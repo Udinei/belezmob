@@ -1,8 +1,9 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSelector } from 'react-redux';
 
-import { format, getMinutes, getHours,isAfter, parseISO } from 'date-fns';
+import { isAfter, parseISO, format } from 'date-fns';
 import api from '~/services/api';
 import formatInTimeZone from '~/services/formatInTimeZone';
 
@@ -10,7 +11,7 @@ import Background from '~/components/Background';
 import DateInput from '~/components/DateInput';
 
 import { Container, HourList, Hour, Title } from './styles';
-import dateTimeZoneMob from '~/services/dateTimeZoneMob';
+//import dateTimeZoneMob from '~/services/dateTimeZoneMob';
 import * as RNLocalize from "react-native-localize";
 
 const options = {
@@ -21,24 +22,30 @@ const options = {
 };
 
 export default function SelectDateTime({ navigation }) {
+
+    // acessa o estado do redux e obtem os dados do profile que foram gravados
+    // lá durante o login
+    const user = useSelector(state => state.user.profile);
+
     // Obtem timeZone do dispositivo ex: 'America/Cuiaba'
-    // vai ser enviado como parametro para o backend calcular datas e tempo
+    // sera usada no calculo das datas e horarios
     const timeZone = RNLocalize.getTimeZone();
-    let tzDate = new Date().toLocaleDateString("pt-BR", options);
-    console.log('.111................',tzDate);
 
     // data de hoje com timeZone do dispoitivo
-    const hoje = dateTimeZoneMob;
+    // const hoje = dateTimeZoneMob;
     const dateTimeZone = formatInTimeZone(new Date(), "yyyy-MM-dd'T'kk:mm:ssxxx", timeZone);
-    console.log('TimeZone ......', timeZone);
-    console.log('dateTimeZone........', dateTimeZone);
-    console.log('hoje........', hoje);
-    console.log('hoje0........', new Date(hoje));
-    console.log('hoje1........', new Date('2020-08-27'));
-    const datatmp = new Date('2020-08-27T01:30:32.000Z');
-    // staste inicia com a data de hoje
-    const [date, setDate] = useState(new Date(dateTimeZone));
+
+    /** verifica se o formato da horas é igual 24 horas */
+    let horas24 = false;
+    if (parseInt(dateTimeZone.split('T')[1].slice(0, 2)) === 24) {
+        horas24 = true;
+    }
+
+    /** inicia state com a data de hoje, se já são 24horas, new Date
+     * retornara 00 horas, sem informar diferenca de horario do timeZone.*/
+    const [date, setDate] = useState(horas24 ? new Date() : new Date(dateTimeZone));
     const [hours, setHours] = useState([]);
+    const [appointmentsUser, setAppointmentsUser] = useState([]);
 
     // obtendo o provider da navegação
     const provider = navigation.getParam('provider');
@@ -46,70 +53,101 @@ export default function SelectDateTime({ navigation }) {
     useEffect(() => {
         async function loadAvaiable() {
 
-            // retorna todos dos horarios de hoje disponiveis do provedor.id informado
+            // retorna todos dos horarios do provedor.id informado disponiveis hoje
             const response = await api.get(`providers/${provider.id}/available`, {
                 params: {
                     date: date.getTime(), //retorna o formato em timestamp
-                    timeZoneFront: timeZone,
                 }
             });
 
 
-            // corrige horarios conforme timeZone e se ainda podem ser cancelados
-            console.log('Em selectDateTime/MOB 11111....................');
             const { data } = response;
-            const appointments = [...data].pop(); // obtem o ultimo item que e appointments
-            data.pop(); // remove a lista de appointments de data
 
-            console.log('......',appointments.appointments);
-            console.log('hoje...................',hoje);
-            console.log('new date...................', new Date(hoje, timeZone));
+            // obtem a lista de agendamentos do provedor o ultimo item
+            const appointments = [...data].pop();
+            console.log('Appointments.11...................', appointments);
 
+            //  remove a lista de appointments, ficando em data somente os horarios
+            data.pop();
+            console.log('Appointments.data...................', data);
 
+            //  retorna horarios disponiveis do provedor
             const avaiableNew = data.map(time => {
-                console.log('time...................', time.time);
-                //console.log('value...................', time.value);
-                console.log('time value...................', time.value);
-                console.log('dateTimezone...................', dateTimeZone);
-                console.log('avaible......',isAfter(parseISO(time.value), parseISO(dateTimeZone)));
-
                 return {
                     time: time.time,
                     value: time.value,
                     avaiable:
+                        // se encontrar um agendamento para o horario(time) retorna false
                         isAfter(parseISO(time.value), parseISO(dateTimeZone)) &&  // se a data data agendada ja passou de hoje retorna false
                         !appointments.appointments.find(a => {
-
                             let dateAppointment = formatInTimeZone(a.date, "yyyy-MM-dd'T'kk:mm:ssxxx", timeZone);
-                            console.log('parseISO(a.date)...........', parseISO(a.date))
-                            console.log('a.date..............', a.date);
-                            console.log('dateAppointment..............', dateAppointment.split('T')[1].slice(0,5));
-                            console.log('dateAppoinmtm com parse..............',parseISO(dateAppointment));
-                            console.log('time.time..............', time.time);
-                            //return format(parseISO(a.date), 'HH:mm') === time.time}),
-                            let tmp = dateAppointment.split('T')[1].slice(0,5);
-                            return  tmp === time.time}),
-                    // se encontrar um agendamento para o horario(time) retorna false
+                            let tmp = dateAppointment.split('T')[1].slice(0, 5);
+                            return (tmp === time.time)
+                        }),
                 };
-
             })
 
-            console.log('avaiable.......',avaiableNew);
+            // exibe os horarios disponiveis na data
             setHours(avaiableNew);
-
         }
+
         // chama a funcao
         loadAvaiable();
 
     }, [date, provider.id]);
 
+
     // carrega tela de confirmação de horario com o prestador
-    function handleSelectHour(time) {
-        navigation.navigate('Confirm', {
-            provider,
-            time,
+    async function handleSelectHour(time) {
+
+        // retorna todos dos horarios de data selecionada já agendados para o user logado
+        const response = await api.get(`users/${user.id}/available`, {
+            params: {
+                date: date.getTime(), //retorna o formato em timestamp
+            }
         });
+
+        // obtem a lista de agendamentos do user
+        const appointmentsUser = response.data;
+
+        // se encontrar retorna o agendamento do user para o horario selecionado
+        // e undefined caso contrario
+        const hasAppointments = appointmentsUser.find(a => {
+            let dateAppointment = formatInTimeZone(a.date, "yyyy-MM-dd'T'kk:mm:ssxxx", timeZone);
+            let hoursTZ = dateAppointment.split('T')[1].slice(0, 5); // horario com timeZone
+
+            return (hoursTZ === time.split('T')[1].slice(0, 5));
+        })
+
+        // se o user ja tiver algum agendamento no horario selecionado
+        if (hasAppointments) {
+            Alert.alert(
+                'Horário já agendado!',
+                `Você já agendou esse horário com ${hasAppointments.provider.name}.\n
+                 Click em 'OK' se deseja agendar também esse horário com ${provider.name}?`,
+                [
+                    {
+                        text: 'Cancel',
+                        onPress: () => { return },
+                        style: 'cancel'
+                    },
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.navigate('Confirm', { provider, time })
+                    }
+                ],
+                { cancelable: false }
+            );
+
+        } else {
+
+            navigation.navigate('Confirm', {
+                provider,
+                time,
+            });
+        }
     }
+
 
     return (
         <Background>

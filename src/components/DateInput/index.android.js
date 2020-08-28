@@ -1,6 +1,6 @@
 ﻿import React, { useMemo } from 'react';
 import { DatePickerAndroid } from 'react-native';
-import { format } from 'date-fns-tz';
+import { format, parseISO } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 import * as RNLocalize from "react-native-localize";
 
@@ -14,12 +14,15 @@ const options = {
     minute: 'numeric',
     timeStyle: ('short' ),
     timeZone: RNLocalize.getTimeZone(),
+    hour12: false,
 }
 
 import { Container, DateButton, DateText } from './styles'
 
 export default function DateInput({ date, onChange }) {
-     console.log('teim..............',options.timeZone);
+    // TODO: Verificar erro de horario do date apos as 00:00 ou 24:00
+     console.log('DateInput..............', date);
+
     const dateFormatted = useMemo(() =>
         //format(date, "dd 'de' MMMM 'de' yyyy", { locale: pt })
         new Date(date).toLocaleDateString('pt-br', options)
