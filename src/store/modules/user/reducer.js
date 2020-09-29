@@ -1,5 +1,5 @@
-﻿/** Essa funcao ouve chamadas das actions na app, e retorna o estado alterado de acordo a alteração da action */
-// estado inicial
+﻿/** Essa funcao ouve chamadas das actions na app, e retorna o
+ * estado alterado de acordo a alteração da action no estado inicial*/
 import produce from 'immer';
 
 const INITIAL_STATE = {

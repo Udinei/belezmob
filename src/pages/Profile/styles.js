@@ -48,3 +48,8 @@ export const LogoutButton = styled(Button)`
     margin-top: 10px;
     background: #f64c75;
 `;
+
+export const ImportContatoButton = styled(Button)`
+    margin-top: 10px;
+    background: #f75d89;
+`;

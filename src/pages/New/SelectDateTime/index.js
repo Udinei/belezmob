@@ -24,7 +24,7 @@ const options = {
 export default function SelectDateTime({ navigation }) {
 
     // acessa o estado do redux e obtem os dados do profile que foram gravados
-    // lá durante o login
+    // durante o login
     const user = useSelector(state => state.user.profile);
 
     // Obtem timeZone do dispositivo ex: 'America/Cuiaba'
@@ -48,28 +48,37 @@ export default function SelectDateTime({ navigation }) {
     const [appointmentsUser, setAppointmentsUser] = useState([]);
 
     // obtendo o provider da navegação
-    const provider = navigation.getParam('provider');
+   // const provider = navigation.getParam('provider');
+    const contact = navigation.getParam('contact');
+    const contacts = navigation.getParam('contacts');
+
+    console.log('contacts ui...........',contacts);
 
     useEffect(() => {
         async function loadAvaiable() {
 
             // retorna todos dos horarios do provedor.id informado disponiveis hoje
-            const response = await api.get(`providers/${provider.id}/available`, {
+            /*const response = await api.get(`providers/${provider.id}/available`, {
+                params: {
+                    date: date.getTime(), //retorna o formato em timestamp
+                }
+            });*/
+
+            // retorna todos dos horarios do contato informado disponiveis para hoje
+            const response = await api.get(`contacts/${contact.recordID}/available`, {
                 params: {
                     date: date.getTime(), //retorna o formato em timestamp
                 }
             });
 
-
             const { data } = response;
 
-            // obtem a lista de agendamentos do provedor o ultimo item
+            // obtem o ultimo item da lista de agendamentos do provedor
             const appointments = [...data].pop();
-            console.log('Appointments.11...................', appointments);
 
             //  remove a lista de appointments, ficando em data somente os horarios
             data.pop();
-            console.log('Appointments.data...................', data);
+
 
             //  retorna horarios disponiveis do provedor
             const avaiableNew = data.map(time => {
@@ -94,13 +103,13 @@ export default function SelectDateTime({ navigation }) {
         // chama a funcao
         loadAvaiable();
 
-    }, [date, provider.id]);
+    }, [date, contact.recordID]);
 
 
     // carrega tela de confirmação de horario com o prestador
     async function handleSelectHour(time) {
 
-        // retorna todos dos horarios de data selecionada já agendados para o user logado
+        // retorna todos dos horarios já agendados para o user logado
         const response = await api.get(`users/${user.id}/available`, {
             params: {
                 date: date.getTime(), //retorna o formato em timestamp
@@ -109,6 +118,7 @@ export default function SelectDateTime({ navigation }) {
 
         // obtem a lista de agendamentos do user
         const appointmentsUser = response.data;
+
 
         // se encontrar retorna o agendamento do user para o horario selecionado
         // e undefined caso contrario
@@ -119,13 +129,19 @@ export default function SelectDateTime({ navigation }) {
             return (hoursTZ === time.split('T')[1].slice(0, 5));
         })
 
-        // se o user ja tiver algum agendamento no horario selecionado
+
+        // se existir um contato ja agendado para o horario selecionado
         if (hasAppointments) {
+
+            // encontre o contato ja agendado
+             const contactoAgendado = contacts.find(a => parseInt(a.recordID) === hasAppointments.contact_id);
+
+             // exibe mensagem
             Alert.alert(
                 'Horário já agendado!',
-                `Você já agendou esse horário com ${hasAppointments.provider.name}.\n
-                 Click em 'OK' se deseja agendar também esse horário com ${provider.name}?`,
-                [
+                `Você já agendou esse horário com ${contactoAgendado.displayName}.\n
+                 Click em 'OK' se deseja agendar também esse horário com ${contact.givenName}?`,
+                 [
                     {
                         text: 'Cancel',
                         onPress: () => { return },
@@ -133,7 +149,7 @@ export default function SelectDateTime({ navigation }) {
                     },
                     {
                         text: 'OK',
-                        onPress: () => navigation.navigate('Confirm', { provider, time })
+                        onPress: () => navigation.navigate('Confirm', { contact, time })
                     }
                 ],
                 { cancelable: false }
@@ -142,7 +158,7 @@ export default function SelectDateTime({ navigation }) {
         } else {
 
             navigation.navigate('Confirm', {
-                provider,
+                contact,
                 time,
             });
         }

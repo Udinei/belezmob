@@ -2,7 +2,7 @@
 import { RectButton } from 'react-native-gesture-handler';
 
 export const Container = styled.SafeAreaView`
-  flex: 1;
+   flex: 1;
 `;
 
 export const ProvidersList = styled.FlatList.attrs({
@@ -35,3 +35,18 @@ export const Name = styled.Text`
   color: #333;
   text-align: center;
 `;
+
+/*
+export const Spinner = styled.Text`
+    flex: 1;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+`;
+
+export const InputStyle = styled.Text`
+    height: 40;
+    border-color: gray;
+    border-width: 1;
+    text-align: center;
+`;*/

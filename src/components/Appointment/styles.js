@@ -35,10 +35,13 @@ export const Name = styled.Text`
     font-weight: bold;
     font-size: 14px;
     color: #333;
+    margin-left: 10px;
+    margin-top: 4px;
 `;
 
 export const Time = styled.Text`
     color: #000000;
     font-size: 15px;
     margin-top: 4px;
+    margin-left: 10px;
 `;

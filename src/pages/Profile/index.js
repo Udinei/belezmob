@@ -2,7 +2,11 @@
 import { useSelector, useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { Container, Title, Separator, Form, FormInput, SubmitButton, LogoutButton } from './styles';
+import api from '~/services/api';
+import Contacts from 'react-native-contacts';
+import {  PermissionsAndroid } from 'react-native';
+
+import { Container, Title, Separator, Form, FormInput, SubmitButton, LogoutButton, ImportContatoButton } from './styles';
 import Background from '~/components/Background';
 import { signOut } from '~/store/modules/auth/actions';
 
@@ -26,6 +30,9 @@ export default function Profile() {
     const [oldPassword, setOldPassword ] = useState('');
     const [password, setPassword ] = useState('');
     const [confirmPassword, setConfirmPassword ] = useState('');
+     // acessa o estado do redux e obtem os dados do profile que foram gravados
+    // durante o login
+    const user = useSelector(state => state.user.profile);
 
     // toda vez que profile for alterado, a função useEffect sera executada
     // limpando os campos
@@ -49,6 +56,99 @@ export default function Profile() {
 
     function handleLogout(){
         dispatch(signOut());
+    }
+
+    function handleImportContatos(){
+        requestReadContactsPermission();
+    }
+
+    async function requestReadContactsPermission() {
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+                {
+                    'title': 'App Premission',
+                    'message': 'Chat x App need permission.'
+                }
+            )
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                console.log("You can read contacts")
+                listContacts();
+
+            } else {
+                console.log("read contacts permission denied")
+            }
+        } catch (err) {
+            console.warn(err)
+        }
+    }
+
+
+  async function listContacts() {
+
+        Contacts.checkPermission((err, permission) => {
+            if (err) throw err;
+
+            // Contacts.PERMISSION_AUTHORIZED || Contacts.PERMISSION_UNDEFINED || Contacts.PERMISSION_DENIED
+            if (permission === 'undefined') {
+                Contacts.requestPermission((err, permission) => {
+                    // ...
+                })
+            }
+            if (permission === 'authorized') {
+                Contacts.getAll((err, contacts) => {
+                    if (err) throw err;
+
+
+                    // cria uma nova lista de contatos somente com os dados desejados, retorna undefined caso nao encontre nada
+                    const contactsNew = contacts.map(contato => {
+                        const phoneNumbers = contato.phoneNumbers.map(fone => fone)
+                        // console.log('.....', phoneNumbers);
+                        return {
+                            displayName: contato.displayName,
+                            phoneNumbers: phoneNumbers,
+                        }
+                    });
+
+                    // cria a nova lista de contatos no banco e retorna seus dados
+                    const listContactosCreated = (async () => {
+                        const response = await api.post('/contatos',
+                            {
+                                contatos: contactsNew,
+                                user_id: user.id
+                            }
+                        )
+                        return response.data;
+                    });
+
+                    // recupera lista de contatos criado
+                    listContactosCreated().then((data) => {
+                        console.log('contatos salvo com sucesso.....', data)
+                    }
+                    );
+                })
+
+               /* const tmp = (async () => {
+                    const tmp = await api.get('/contatos', {
+                             params:{ user_id: 16}
+                      })
+
+                    //console.log('foi...', tmp.data);
+                    return tmp.data;
+                   });
+
+                tmp().then((data)=>{
+                    console.log('uraaa.....',data);
+                });*/
+            }
+            if (permission === 'denied') {
+                // x.x
+            }
+
+
+        })
+
+
     }
 
 
@@ -116,6 +216,8 @@ export default function Profile() {
 
                     <SubmitButton onPress={handleSubmit}>Atualizar perfil</SubmitButton>
                     <LogoutButton onPress={handleLogout}>Sair do Belez</LogoutButton>
+                    <ImportContatoButton onPress={handleImportContatos}>Importar Contatos</ImportContatoButton>
+
                 </Form>
             </Container>
         </Background>
