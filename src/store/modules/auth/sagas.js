@@ -63,7 +63,8 @@ export function* signUp({ payload }){
           //provider: true,
       });
 
-     // history.push('/');
+      console.log('payload...........', payload)
+      //history.push('/');
 
     }catch (err){
         Alert.alert('Falha no cadastro, verifique seus dados!');
