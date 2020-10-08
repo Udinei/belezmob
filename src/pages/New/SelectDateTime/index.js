@@ -49,10 +49,10 @@ export default function SelectDateTime({ navigation }) {
 
     // obtendo o provider da navegação
    // const provider = navigation.getParam('provider');
-    const contact = navigation.getParam('contact');
+    const contact = navigation.getParam('item');
     const contacts = navigation.getParam('contacts');
 
-    console.log('contacts ui...........',contacts);
+    console.log('contacts ui...........',contact);
 
     useEffect(() => {
         async function loadAvaiable() {

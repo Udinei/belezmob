@@ -10,7 +10,8 @@ import {
     View,
     Image,
     TextInput,
-    ActivityIndicator
+    ActivityIndicator,
+    FlatList
 } from "react-native";
 
 
@@ -37,6 +38,8 @@ export default function SelectProvider({ navigation }) {
     const [searchPlaceholder, setSearchPlaceholder] = useState('Search');
     const [typeText, setTypeText] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const [prevState, setPrevState] = useState({});
 
     // acessa o estado do redux e obtem os dados do profile que foram gravados
     // durante o login
@@ -132,6 +135,8 @@ export default function SelectProvider({ navigation }) {
     }
 
     async function onPressContact(contact) {
+        console.log('onPressContact...', contact);
+
         Contacts.checkPermission((err, permission) => {
             if (err) throw err;
 
@@ -180,9 +185,29 @@ export default function SelectProvider({ navigation }) {
                 console.log('permissao negada', permission)
             }
         })
-
-
     }
+
+   const renderFooter = () => {
+        if (loading) {
+            return <ActivityIndicator size="large" />;
+        } else {
+            return null;
+        }
+    };
+
+   const fetchMore = () => {
+        if (loading) {
+            return null;
+        }
+        setPrevState(
+            (prevState) => {
+                return { loading: true, pageNum: prevState.pageNum + 1 };
+            },
+            () => {
+                this.sendAPIRequest(null, true);
+            }
+        );
+    };
 
     return (
         <Background>
@@ -216,43 +241,78 @@ export default function SelectProvider({ navigation }) {
                                 <ActivityIndicator size="large" color="#0000ff" />
                             </View>
                         ) : (
-                            <ScrollView style={ {
-                                flex: 1,
-                                padding: 20,
-                                backgroundColor: '#fff',
-                                margin: 10
-                            }
-                            }>
-                                {
-                                    contacts.map(contact => {
-                                        return (
-                                            <ListItem
-                                                leftElement={
-                                                    <Avatar
-                                                        img={
-                                                            contact.hasThumbnail
-                                                                ? { uri: contact.thumbnailPath }
-                                                                : undefined
-                                                        }
-                                                        placeholder={ getAvatarInitials(
-                                                            `${contact.givenName} ${contact.familyName}`
-                                                        ) }
-                                                        width={ 40 }
-                                                        height={ 40 }
-                                                    />
-                                                }
-                                                key={ contact.recordID }
-                                                title={ `${contact.givenName} ${contact.familyName}` }
-                                                description={ `${contact.company}` }
-                                                onPress={ () => {
-                                                    onPressContact(contact)
-                                                    navigation.navigate('SelectDateTime', { contact, contacts })
-                                                } }
-                                            />
-                                        );
-                                    })
-                                }
-                            </ScrollView>
+                            <FlatList
+                                data={ contacts }
+                                renderItem={ ({ item, index }) => {
+                                   return (
+                                    <ListItem
+                                    leftElement={
+                                        <Avatar
+                                            img={
+                                                item.hasThumbnail
+                                                    ? { uri: item.thumbnailPath }
+                                                    : undefined
+                                            }
+                                            placeholder={ getAvatarInitials(
+                                                `${item.givenName} ${item.familyName}`
+                                            ) }
+                                            width={ 40 }
+                                            height={ 40 }
+                                        />
+                                    }
+                                    key={ item.recordID }
+                                    title={ `${item.givenName} ${item.familyName}` }
+                                    description={ `${item.company}` }
+                                    onPress={ () => {
+                                        onPressContact(item)
+                                        navigation.navigate('SelectDateTime', { item, contacts })
+                                    } }
+                                />)
+                                } }
+                                keyExtractor={ (item, index) => item.recordID.toString() }
+                                onEndReached={ fetchMore }
+                                onEndReachedThreshold={ 0.1 }
+                                ListFooterComponent={ renderFooter }
+                                refreshing={ loading }
+                            />
+                            /**  <ScrollView style={ {
+                                 flex: 1,
+                                 padding: 20,
+                                 backgroundColor: '#fff',
+                                 margin: 10
+                             }
+                             }>
+                                 {
+                                     contacts.map(contact => {
+                                         return (
+                                             <ListItem
+                                                 leftElement={
+                                                     <Avatar
+                                                         img={
+                                                             contact.hasThumbnail
+                                                                 ? { uri: contact.thumbnailPath }
+                                                                 : undefined
+                                                         }
+                                                         placeholder={ getAvatarInitials(
+                                                             `${contact.givenName} ${contact.familyName}`
+                                                         ) }
+                                                         width={ 40 }
+                                                         height={ 40 }
+                                                     />
+                                                 }
+                                                 key={ contact.recordID }
+                                                 title={ `${contact.givenName} ${contact.familyName}` }
+                                                 description={ `${contact.company}` }
+                                                 onPress={ () => {
+                                                     onPressContact(contact)
+                                                     navigation.navigate('SelectDateTime', { contact, contacts })
+                                                 } }
+                                             />
+                                         );
+                                     })
+                                 }
+                             </ScrollView>*/
+
                         )
                 }
 
