@@ -241,7 +241,13 @@ export default function SelectProvider({ navigation }) {
                                 <ActivityIndicator size="large" color="#0000ff" />
                             </View>
                         ) : (
-                            <FlatList
+                            <FlatList style={ {
+                                flex: 1,
+                                padding: 20,
+                                backgroundColor: '#fff',
+                                margin: 10
+                            }
+                            }
                                 data={ contacts }
                                 renderItem={ ({ item, index }) => {
                                    return (
@@ -270,6 +276,8 @@ export default function SelectProvider({ navigation }) {
                                 />)
                                 } }
                                 keyExtractor={ (item, index) => item.recordID.toString() }
+                                initialNumToRender={8}
+                                maxToRenderPerBatch={2}
                                 onEndReached={ fetchMore }
                                 onEndReachedThreshold={ 0.1 }
                                 ListFooterComponent={ renderFooter }
