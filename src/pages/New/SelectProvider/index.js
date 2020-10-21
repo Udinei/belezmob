@@ -175,10 +175,10 @@ export default function SelectProvider({ navigation }) {
                     });
 
                     // recupera lista de contatos criado
-                    listContactosCreated().then((data) => {
+                    /**listContactosCreated().then((data) => {
                         console.log('testa.....', data)
                     }
-                    )
+                    )*/
                 })
 
             } if (permission === 'denied') {

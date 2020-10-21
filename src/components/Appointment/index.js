@@ -18,6 +18,8 @@ import Avatar from "~/components/Avatar";
 // data = destruc. de response
 export default function Appointment({ onCancel, data }) {
 
+    console.log('data.....', data);
+
     // memoriza quanto tempo falta para o atendimento
     const dateParse = useMemo(() => {
         const timeZone = RNLocalize.getTimeZone();
@@ -26,9 +28,9 @@ export default function Appointment({ onCancel, data }) {
 
         const horasAndMinutes = format(parseISO(dateUTC), 'HH:mm');
 
-         //TODO: Bug do formatRelative que não caulcula a hora corretamente
+        //TODO: Bug do formatRelative que não caulcula a hora corretamente
         // calcula quanto tempo falta até o dia do atendimento
-         let dataCustom = formatRelative(parseISO(data.date), new Date(), {
+        let dataCustom = formatRelative(parseISO(data.date), new Date(), {
             locale: pt,
             addSuffix: true,
         });
@@ -74,20 +76,29 @@ export default function Appointment({ onCancel, data }) {
                 <Avatar
                     img={
 
-                        data.contact.hasThumbnail
+                        data.contact && data.contact.hasThumbnail
                             ? { uri: data.contact.thumbnailPath }
                             : undefined
                     }
                     placeholder={
-                        getAvatarInitials(
-                            `${data.contact.givenName} ${data.contact.familyName}`
-                        )
+                        data.contact && data.contact.givenName && data.contact.familyName
+                            ?
+                            getAvatarInitials(
+                                `${data.contact.givenName} ${data.contact.familyName}`
+                            )
+                            : undefined
                     }
 
                     width={ 40 }
                     height={ 40 }
                 />
-                <Name>{ data.contact.givenName }</Name>
+                <Name>
+                    {
+                        data.contact && data.contact.givenName
+                            ? data.contact.givenName
+                            : undefined
+                    }
+                </Name>
                 <Time>{ dateParse }</Time>
 
             </Left>

@@ -1,4 +1,9 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿/**
+ * A data do agendamento vai ser recuperada e gravada no banco em UTC
+ * Todo agendamento tera a sua data convertida para o UTC do dispositivo do cliente
+ */
+
+import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { withNavigationFocus } from 'react-navigation';
 import api from '~/services/api';
@@ -20,7 +25,7 @@ import { Container, Title, List } from './styles';
 
 function Dashboard({ isFocused }) {
 
-    // Obtem a data e horario atual o dispositivo
+    // Obtem a data e horario atual do dispositivo
     const hoje = dateTimeZoneMob;
     const timeZone = RNLocalize.getTimeZone();
 
@@ -28,35 +33,38 @@ function Dashboard({ isFocused }) {
     const [appointments, setAppointments] = useState([]);
     const [contatos, setContatos] = useState([]);
 
+    // obtem todos os agendamentos do usuario (cliente) com seus contatos do dispositivo
     async function loadAppointments() {
 
         //const response = await api.get('appoitments');
-        // obtem os agendamentos do cliente com seus contatos do dispositivo
+        // obtendo os agendamentos
         const response = await api.get('/appoitments/contacts');
 
         // obtem o array dos dados do agendamento
         const agendamentos = response.data;
 
-        // retorn um novo objetos com os dados do contato preenchido
+        // retorna um novo array de objetos com os dados dos agendamento validados para o UTC cliente
         const newData = await agendamentos.map(agenda => {
 
+            // converte data do agendamento em UTC para timezone do dispositivo
             const dateTimeZone = formatInTimeZone(parseISO(agenda.date), "yyyy-MM-dd kk:mm:ss xxx", timeZone);
 
             const newDateAgendaTimeZone = dateTimeZone.split(' ')[0] + "T" + dateTimeZone.split(' ')[1] + ".000Z";
 
-            // inclui a lista de contatos do dispositivo agendados
+            // se encontrar o contato na agenda, e incluia na lista de contatos  agendados
             agenda.contact = contatos.find(contato => parseInt(contato.recordID) === agenda.contact_id)
 
-            // sincroniza atributo past (se os horarios ja passaram conforme timeZone)
+            // seta past = true se o horario ja passou conforme timeZone do dispositivo
             agenda.past = isBefore(parseISO(newDateAgendaTimeZone), new Date(hoje));
 
-            // exibe icone de cancelamento, agendamentos só podem ser canceladas somente duas horas antes do agendado
+            // cancelable = true que define se icone de cancelamento sera exibido, os agendamentos podem ser canceladas até duas horas antes do agendado
             agenda.cancelable = isBefore(new Date(hoje), subHours(parseISO(newDateAgendaTimeZone), 2))
 
             // corrige horarios conforme timeZone
             agenda.date = newDateAgendaTimeZone;
 
-            // incluso na lista de agendamos os contatos do dispositivo do cliente
+            // agendamento formatado para exibir da data no timezone do dispositivo
+            // e qual contato agendado
             const newAgenda = {
                 cancelable: agenda.cancelable,
                 contact: agenda.contact,
@@ -67,8 +75,6 @@ function Dashboard({ isFocused }) {
             }
 
             return newAgenda;
-
-
         });
 
         //  console.log('Appointments_Dashboard.......'. newData)
@@ -157,14 +163,13 @@ function Dashboard({ isFocused }) {
     return <Background>
         <Container>
             <Title>Agendamentos</Title>
-
+           { console.log('.............', appointments.length)}
             <List
                 data={ appointments }
                 keyExtractor={ item => String(item.id) }
-                renderItem={ ({ item }) => <Appointment onCancel={ () => handleCancel(item.id) } data={ item }
-                /> }
+                renderItem={ ({ item }) => <Appointment onCancel={ () => handleCancel(item.id) } data={ item } /> }
+           />
 
-            />
 
         </Container>
     </Background>;
